@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>FNAE</title>
+<style>
+body { margin:0; overflow:hidden; background:black; font-family:monospace; color:#00ff00; }
+#office { position:fixed; top:0; left:-20%; width:140%; height:100%; object-fit:cover; transition:left 0.08s linear; }
+#cameraWindow { 
+  position:absolute; width:700px; height:420px; border:3px solid #00ff00; background:black; 
+  display:none; overflow:hidden; z-index:2; left:50%; top:50%; transform:translate(-50%,-50%); 
+  opacity:0; transition:opacity 0.5s ease-in-out; 
+}
+#cameraImage { width:100%; height:100%; object-fit:cover; opacity:1; transition:opacity 1s; }
+#static { position:absolute; top:0; left:0; width:100%; height:100%; opacity:0.12; z-index:3; pointer-events:none; transition:opacity 0.35s ease-out; }
+#errOverlay { position:absolute; top:10px; right:10px; width:100px; height:50px; display:none; z-index:5; }
+#taskBar { 
+  position:absolute; left:50%; top:calc(50% + 230px); transform:translateX(-50%); width:700px; height:60px; 
+  background:rgba(0,0,0,0.8); border:3px solid #00ff00; border-radius:12px; display:flex; 
+  justify-content:flex-start; align-items:center; padding:0 10px; 
+  opacity:0; transition:opacity 0.5s ease-in-out; z-index:4; 
+}
+#taskBar button { margin-right:10px; width:80px; height:40px; border:none; background:transparent; color:#00ff00; font-family:monospace; font-size:14px; cursor:pointer; }
+#hud { position:absolute; top:10px; right:20px; font-size:20px; z-index:5; }
+#powerUsage { position:absolute; top:48px; right:20px; display:flex; gap:4px; align-items:flex-end; z-index:5; }
+.usageBar { width:14px; height:22px; border:2px solid #00ff00; border-radius:3px; transition:height 0.3s ease; }
+.tab { position:absolute; background:black; padding:20px 30px; cursor:pointer; font-weight:bold; font-size:18px; border:3px solid #00ff00; border-radius:4px; transition:opacity 0.4s; z-index:5; }
+#controlTab { left:10px; bottom:10px; opacity:0; pointer-events:none; }
+#camTab { right:0; top:92px; writing-mode: vertical-rl; transform:rotate(180deg); opacity:0; pointer-events:none; }
+#lightTab { left:10px; top:200px; writing-mode: vertical-rl; transform:rotate(180deg); opacity:0; pointer-events:none; }
+#controlPanel { position:absolute; width:400px; max-height:80%; background:black; border:3px solid #00ff00; padding:20px; display:none; z-index:5; left:50%; top:50%; transform:translate(-50%,-50%); overflow:auto; }
+.button { margin-top:10px; border:1px solid #00ff00; padding:6px; cursor:pointer; }
+#errorText { color:red; display:inline-block; margin-left:5px; font-weight:bold; }
+#startPopup { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); color:#00ff00; display:flex; justify-content:center; align-items:center; z-index:10; flex-direction:column; text-align:center; font-size:18px; padding:20px; }
+#startPopup button { margin-top:20px; padding:10px 20px; cursor:pointer; border:1px solid #00ff00; background:black; color:#00ff00; }
+</style>
+</head>
+<body>
+<img id="office" src="assets/TEXTURES/office.png">
+<div id="cameraWindow">
+  <img id="cameraImage" src="assets/TEXTURES/cam1.jpg">
+  <img id="static" src="assets/TEXTURES/static.gif">
+  <img id="errOverlay" src="assets/TEXTURES/err.png">
+</div>
+<div id="taskBar">
+  <button>CAM 1</button><button>CAM 2</button><button>CAM 3</button><button>CAM 4</button><button>CAM 5</button>
+</div>
+<div id="hud"><div id="power">Power: 100%</div></div>
+
+<div id="powerUsage">
+  <div class="usageBar" id="bar1" style="background:#00ff00;"></div>
+  <div class="usageBar" id="bar2" style="background:#00ff00;"></div>
+  <div class="usageBar" id="bar3" style="background:#ffff00;"></div>
+  <div class="usageBar" id="bar4" style="background:#ff0000;"></div>
+</div>
+
+<div id="controlTab" class="tab">^^ CONTROL PANEL ^^</div>
+<div id="camTab" class="tab">^^ CAMERAS ^^</div>
+<div id="lightTab" class="tab">LIGHT</div>
+<div id="controlPanel">
+  CONTROL PANEL >>><br><br>
+  <div class="button" id="restartBtn">RESTART CAMERA SYSTEM <span id="errorText"></span></div>
+  <div class="button" id="shutVentsBtn">>>> SHUT VENTS</div>
+  <br><br>
+  You will be rescued in 5 days, survive the 5 days without getting caught.<br><br>
+  If you are caught then thats wraps for you.<br><br>
+  If the rescue team cannot make it to you, you will have to wait 2 additional days.<br><br>
+  Good luck.
+</div>
+<div id="startPopup">
+  <p>Welcome to FNAE!<br><br>Survive the night and monitor the cameras carefully. Use lights and controls wisely, because power is limited.</p>
+  <button id="startButton">OK</button>
+</div>
+
+<audio id="fanSound" src="assets/SFX/fan.wav" loop></audio>
+<audio id="monitorStatic" src="assets/SFX/monitor_static.wav" loop></audio>
+<audio id="camOpenSound" src="assets/SFX/camopen.wav"></audio>
+<audio id="camCloseSound" src="assets/SFX/camclose.wav"></audio>
+<audio id="buttonClick" src="assets/SFX/click.wav"></audio>
+<audio id="powerOut" src="assets/SFX/powerout.wav"></audio>
+<audio id="beepSound" src="assets/SFX/beep.wav" loop></audio>
+<audio id="alarmSound" src="assets/SFX/alerm.wav" loop></audio>
+
+<script>
+// ==================== VARIABLES ====================
+const office = document.getElementById("office");
+const controlTab = document.getElementById("controlTab");
+const camTab = document.getElementById("camTab");
+const lightTab = document.getElementById("lightTab");
+const controlPanel = document.getElementById("controlPanel");
+const cameraWindow = document.getElementById("cameraWindow");
+const powerDisplay = document.getElementById("power");
+const taskBar = document.getElementById("taskBar");
+const errOverlay = document.getElementById("errOverlay");
+const restartBtn = document.getElementById("restartBtn");
+const shutVentsBtn = document.getElementById("shutVentsBtn");
+const errorText = document.getElementById("errorText");
+const staticEl = document.getElementById("static");
+const cameraImage = document.getElementById("cameraImage");
+const bar1 = document.getElementById("bar1");
+const bar2 = document.getElementById("bar2");
+const bar3 = document.getElementById("bar3");
+const bar4 = document.getElementById("bar4");
+
+let cameraOpen = false, lightOn = false, power = 100, powerOut = false, powerOutPlayed = false;
+let errorPersistent = false, restarting = false, camSwitchCount = 0;
+let gameStarted = false;
+let flickerInterval = null;
+
+const fanSound = document.getElementById("fanSound");
+const monitorStatic = document.getElementById("monitorStatic");
+const camOpenSound = document.getElementById("camOpenSound");
+const camCloseSound = document.getElementById("camCloseSound");
+const buttonClick = document.getElementById("buttonClick");
+const powerOutAudio = document.getElementById("powerOut");
+const beepSound = document.getElementById("beepSound");
+const alarmSound = document.getElementById("alarmSound");
+const startPopup = document.getElementById("startPopup");
+const startButton = document.getElementById("startButton");
+
+// ==================== HELPERS ====================
+function stopAllLoopingAudio() {
+  [fanSound, monitorStatic, beepSound, alarmSound].forEach(a => { a.pause(); a.currentTime = 0; });
+}
+function playClick() {
+  buttonClick.volume = 0.5; buttonClick.currentTime = 0; buttonClick.play().catch(() => {});
+}
+
+// ==================== CAMERA FLICKER (optimized to feel like FNAF 3) ====================
+function startCameraFlicker() {
+  if (flickerInterval) clearInterval(flickerInterval);
+  
+  flickerInterval = setInterval(() => {
+    if (!cameraOpen || errorPersistent) return;
+
+    // Random burst intensity
+    const burst = 0.3 + Math.random() * 0.45;
+    staticEl.style.opacity = burst;
+    monitorStatic.volume = 0.5 + Math.random() * 0.4;
+
+    // Burst duration: 0.1 to 1.5 seconds (very short or longer)
+    const duration = 100 + Math.random() * 1400;
+
+    setTimeout(() => {
+      if (!cameraOpen || errorPersistent) return;
+      staticEl.style.opacity = powerOut ? 0.5 : 0.12;
+      monitorStatic.volume = powerOut ? 0.1 : 0.35;
+    }, duration);
+  }, 400 + Math.random() * 2100); // 0.4–2.5 seconds between starts → very frequent but not annoying
+}
+function stopCameraFlicker() {
+  if (flickerInterval) clearInterval(flickerInterval);
+}
+
+// ==================== CAMERA WINDOW (fade + immediate camclose sound) ====================
+function openCameraWindow() {
+  cameraOpen = true;
+  cameraWindow.style.display = "block";
+  cameraWindow.style.opacity = 1;
+  taskBar.style.opacity = 1;
+
+  const op = errorPersistent ? 1 : (powerOut ? 0.5 : 0.12);
+  staticEl.style.opacity = op;
+  monitorStatic.volume = errorPersistent ? 1 : (powerOut ? 0.1 : 0.35);
+  monitorStatic.play().catch(() => {});
+
+  camOpenSound.currentTime = 0;
+  camOpenSound.play().catch(() => {});
+
+  startCameraFlicker();
+}
+
+function closeCameraWindow() {
+  cameraWindow.style.opacity = 0;
+  taskBar.style.opacity = 0;
+
+  // Play camclose.wav instantly when fade starts
+  camCloseSound.currentTime = 0;
+  camCloseSound.play().catch(() => {});
+
+  setTimeout(() => {
+    cameraOpen = false;
+    cameraWindow.style.display = "none";
+    monitorStatic.pause();
+    stopCameraFlicker();
+  }, 500);
+}
+
+// ==================== CAMERA SWITCH ====================
+function switchCam(num) {
+  if (errorPersistent || restarting) return;
+  playClick();
+
+  camSwitchCount++;
+  if (camSwitchCount > 4 && Math.random() < 0.08 + camSwitchCount * 0.01) {
+    triggerCameraError();
+    return;
+  }
+
+  staticEl.style.transition = "opacity 0.22s";
+  staticEl.style.opacity = 0.9;
+  monitorStatic.volume = 0.95;
+
+  cameraImage.style.opacity = 0;
+
+  setTimeout(() => {
+    cameraImage.src = (num <= 2) ? `assets/TEXTURES/cam${num}.jpg` : "assets/TEXTURES/color_bars.png";
+    cameraImage.style.opacity = 1;
+  }, 260);
+
+  setTimeout(() => {
+    staticEl.style.transition = "opacity 0.4s ease-out";
+    staticEl.style.opacity = powerOut ? 0.5 : (errorPersistent ? 1 : 0.12);
+    monitorStatic.volume = powerOut ? 0.1 : (errorPersistent ? 1 : 0.35);
+  }, 620);
+}
+
+// ==================== ERROR ====================
+function triggerCameraError() {
+  errorPersistent = true;
+  errOverlay.style.display = "block";
+  restartBtn.innerHTML = "RESTART CAMERA SYSTEM <span id='errorText'></span>";
+  errorText.innerText = "ERROR";
+  staticEl.style.opacity = 1;
+  monitorStatic.volume = 1;
+  stopCameraFlicker();
+  if (controlPanel.style.display === "block") alarmSound.play().catch(() => {});
+}
+
+// ==================== RESTART & SHUT VENTS ====================
+function restartCameras() {
+  if (restarting || !errorPersistent) return;
+  restarting = true;
+  alarmSound.pause();
+  beepSound.currentTime = 0; beepSound.play().catch(() => {});
+
+  let dots = ['.', '..', '...'], i = 0;
+  const interval = setInterval(() => {
+    restartBtn.innerHTML = "RESTART CAMERA SYSTEM " + dots[i] + '<span id="errorText"></span>';
+    i = (i + 1) % dots.length;
+  }, 1000);
+
+  setTimeout(() => {
+    clearInterval(interval);
+    beepSound.pause();
+    errorPersistent = false;
+    errOverlay.style.display = "none";
+    camSwitchCount = 0;
+    restarting = false;
+    staticEl.style.opacity = powerOut ? 0.5 : 0.12;
+    monitorStatic.volume = powerOut ? 0.1 : 0.35;
+    restartBtn.innerHTML = "RESTART CAMERA SYSTEM <span id='errorText'></span>";
+    if (cameraOpen) startCameraFlicker();
+  }, 5000);
+}
+function shutVents() {
+  if (restarting || !errorPersistent) return;
+  restarting = true;
+  playClick();
+  shutVentsBtn.innerHTML = "SHUTTING VENTS...";
+  setTimeout(() => {
+    errorPersistent = false;
+    errOverlay.style.display = "none";
+    camSwitchCount = 0;
+    restarting = false;
+    staticEl.style.opacity = powerOut ? 0.5 : 0.12;
+    monitorStatic.volume = powerOut ? 0.1 : 0.35;
+    shutVentsBtn.innerHTML = ">>> SHUT VENTS";
+    if (cameraOpen) startCameraFlicker();
+  }, 3000);
+}
+
+// Power bars & drain
+function updatePowerBars() {
+  let usage = 1;
+  if (cameraOpen) usage += 2;
+  if (lightOn) usage += 1;
+  bar1.style.height = (usage >= 1) ? '22px' : '8px';
+  bar2.style.height = (usage >= 2) ? '22px' : '8px';
+  bar3.style.height = (usage >= 3) ? '22px' : '8px';
+  bar4.style.height = (usage >= 4) ? '22px' : '8px';
+}
+
+setInterval(() => {
+  if (!gameStarted || power <= 0 || powerOut) return;
+  let drain = 0.2 + (cameraOpen ? 0.6 : 0) + (lightOn ? 0.4 : 0);
+  power -= drain;
+  if (power < 0) power = 0;
+  powerDisplay.innerText = power > 0 ? `Power: ${Math.floor(power)}%` : "POWER OUT";
+  updatePowerBars();
+  if (power <= 0 && !powerOutPlayed) {
+    powerOutPlayed = true; powerOut = true;
+    powerOutAudio.play().catch(() => {});
+    lightOn = false; office.src = "assets/TEXTURES/office.png";
+    closeCameraWindow(); stopAllLoopingAudio();
+  }
+}, 1000);
+
+setInterval(() => {
+  if (cameraOpen && !errorPersistent && Math.random() < 0.07) triggerCameraError();
+}, 25000);
+
+// Panning
+let targetLeft = -20;
+document.addEventListener("mousemove", e => {
+  if (cameraOpen || controlPanel.style.display === "block") return;
+  const w = window.innerWidth;
+  if (e.clientX < 30) targetLeft = 0;
+  else if (e.clientX > w - 30) targetLeft = -40;
+});
+function animatePan() {
+  let current = parseFloat(office.style.left) || -20;
+  if (Math.abs(current - targetLeft) > 0.5) current += (targetLeft - current) * 0.45;
+  if (current > 0) current = 0;
+  if (current < -40) current = -40;
+  office.style.left = current + "%";
+  controlTab.style.opacity = (current >= -5) ? 1 : 0;
+  controlTab.style.pointerEvents = (current >= -5) ? "auto" : "none";
+  const show = (current <= -25);
+  camTab.style.opacity = lightTab.style.opacity = show ? 1 : 0;
+  camTab.style.pointerEvents = lightTab.style.pointerEvents = show ? "auto" : "none";
+  requestAnimationFrame(animatePan);
+}
+animatePan();
+
+// ==================== BUTTONS ====================
+window.onload = function() {
+  startButton.addEventListener("click", () => {
+    startPopup.style.display = "none";
+    gameStarted = true;
+    fanSound.volume = 0.5; fanSound.loop = true;
+    fanSound.play().catch(() => {});
+  }, { once: true });
+
+  document.querySelectorAll("#taskBar button").forEach((btn, idx) => {
+    btn.addEventListener("click", () => switchCam(idx + 1));
+  });
+  restartBtn.addEventListener("click", restartCameras);
+  shutVentsBtn.addEventListener("click", shutVents);
+
+  controlTab.addEventListener("click", () => {
+    if (restarting || powerOut) return;
+    playClick();
+    controlPanel.style.display = controlPanel.style.display === "block" ? "none" : "block";
+    if (errorPersistent && controlPanel.style.display === "block") alarmSound.play().catch(() => {});
+    else alarmSound.pause();
+  });
+  camTab.addEventListener("click", () => {
+    playClick();
+    if (!cameraOpen) openCameraWindow(); else closeCameraWindow();
+  });
+  lightTab.addEventListener("click", () => {
+    playClick();
+    if (powerOut || power <= 0) return;
+    lightOn = !lightOn;
+    office.src = lightOn ? "assets/TEXTURES/office3.png" : "assets/TEXTURES/office.png";
+  });
+};
+
+console.log("✅ Flicker optimized to FNAF 3 feel (very frequent, random 0.1-1.5s bursts) • camclose.wav plays instantly on fade start");
+</script>
+</body>
+</html>
