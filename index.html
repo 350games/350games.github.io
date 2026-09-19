@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Five Nights at Epstein's</title>
+<script src="js/disable-context-menu.js"></script>
 <style>
 body{
   margin:0;
@@ -145,8 +146,7 @@ const clickSound = document.getElementById("clickSound");
 const enemy = document.getElementById("enemy");
 const staticOverlay = document.getElementById("staticOverlay");
 
-/* Block right click */
-document.addEventListener("contextmenu", e => e.preventDefault());
+/* Block dragging in the menu. */
 document.addEventListener("dragstart", e => e.preventDefault());
 
 /* Asset finder */

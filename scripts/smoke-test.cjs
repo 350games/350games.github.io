@@ -35,6 +35,15 @@ app.whenReady().then(async () => {
 
     try {
         await gameWindow.loadFile(path.join(appRoot, "index.html"));
+        const menuBlocksRightClick = await gameWindow.webContents.executeJavaScript(`
+            (() => {
+                const target = document.getElementById("startBtn");
+                const event = new MouseEvent("contextmenu", { bubbles: true, cancelable: true, button: 2 });
+                target.dispatchEvent(event);
+                return event.defaultPrevented;
+            })()
+        `);
+        if (!menuBlocksRightClick) return fail("The main menu allows right-click context menus.");
         await gameWindow.webContents.executeJavaScript("document.getElementById('startBtn').click()");
         const deadline = Date.now() + 30000;
 
@@ -56,6 +65,16 @@ app.whenReady().then(async () => {
                 setTimeout(() => poll().catch((error) => fail(error.stack || error.message)), 250);
                 return;
             }
+
+            const gameBlocksRightClick = await gameWindow.webContents.executeJavaScript(`
+                (() => {
+                    const target = document.getElementById("startButton");
+                    const event = new MouseEvent("contextmenu", { bubbles: true, cancelable: true, button: 2 });
+                    target.dispatchEvent(event);
+                    return event.defaultPrevented;
+                })()
+            `);
+            if (!gameBlocksRightClick) return fail("The game allows right-click context menus.");
 
             const passed = await gameWindow.webContents.executeJavaScript(`
                 (async () => {

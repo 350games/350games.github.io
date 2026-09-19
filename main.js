@@ -15,6 +15,9 @@ function createWindow() {
     }
   });
 
+  // Keep Electron's native context menu disabled for every page in the game.
+  win.webContents.on('context-menu', (event) => event.preventDefault());
+
   win.loadFile('index.html');
 
   // Optional: force fullscreen again after load just in case
