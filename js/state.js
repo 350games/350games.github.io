@@ -1,0 +1,56 @@
+(() => {
+const FNAE = window.FNAE;
+const { gameConfig } = FNAE;
+
+FNAE.state = {
+    cameraOpen: false,
+    lightOn: false,
+    power: gameConfig.gameplay.power.startingAmount,
+    powerOut: false,
+    powerOutPlayed: false,
+    powerTimer: null,
+    errorPersistent: false,
+    restarting: false,
+    camSwitchCount: 0,
+    gameStarted: false,
+    flickerInterval: null,
+    flickerFrame: null,
+    flickerToken: 0,
+    currentCam: 1,
+    enemyPosition: "cam1",
+    canMove: true,
+    moveTimeout: null,
+    infinitePower: false,
+    powerCheatHoldStartedAt: null,
+    lureCooldown: false,
+    lureDotInterval: null,
+    cameraHealth: gameConfig.gameplay.camera.healthStartingAmount,
+    cameraHealthTimer: null,
+    escapeMenuOpen: false,
+    officeTimer: null,
+    cameraTransitionActive: false,
+    cameraFadeTimers: [],
+    movementStaticActive: false,
+    movementStaticToken: 0,
+    controlPanelAlarmTimer: null,
+    controlPanelAlarmGapTimer: null,
+    controlPanelAlarmEndedHandler: null,
+    deathCanContinue: false,
+    isJumpscaring: false,
+    currentNight: 1,
+    isNightActive: false,
+    nightStartTimestamp: null,
+    nightTimerInterval: null,
+    currentPhoneCall: null,
+    isDraggingDecryptWindow: false,
+    decryptDragOffsetX: 0,
+    decryptDragOffsetY: 0,
+    endingGlitchInterval: null,
+    officePanTargetLeft: -20,
+    skipKeys: {
+        sPressed: false,
+        nPressed: false,
+        holdStartedAt: null
+    }
+};
+})();
