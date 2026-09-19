@@ -1,0 +1,40 @@
+{
+  "name": "fnae",
+  "version": "0.5.5",
+  "description": "Five Nights at Epstines",
+  "main": "main.js",
+  "author": "350Games",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win portable",
+    "smoke": "electron scripts/smoke-test.cjs"
+  },
+  "devDependencies": {
+    "electron": "^35.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.fnae.game",
+    "productName": "FNaE",
+    "files": [
+      "**/*",
+      "!dist/**",
+      "!node_modules/.cache/**"
+    ],
+    "asar": true,
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "icon.ico"
+    },
+    "portable": {
+      "artifactName": "FNaE Portable 0.5.8.${ext}"
+    }
+  }
+}

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FNAE</title>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/overlays.css">
+    <link rel="stylesheet" href="css/animations.css">
+</head>
+<body>
+    <!-- Main game scene -->
+    <img id="office" src="assets/TEXTURES/office.png" draggable="false" alt="">
+
+    <!-- Camera monitor -->
+    <div id="cameraWindow">
+        <img id="cameraImage" src="assets/TEXTURES/cam1.jpg" draggable="false" alt="">
+        <img id="static" src="assets/TEXTURES/static.gif" draggable="false" alt="">
+        <img id="errOverlay" src="assets/TEXTURES/err.png" draggable="false" alt="">
+    </div>
+    <div id="taskBar">
+        <button type="button" data-camera="1">CAM 1</button>
+        <button type="button" data-camera="2">CAM 2</button>
+        <button type="button" data-camera="3">CAM 3</button>
+        <button type="button" data-camera="4">CAM 4</button>
+        <button type="button" data-camera="5">CAM 5</button>
+        <button id="lureBtn" type="button">PLAY AUDIO</button>
+    </div>
+
+    <!-- HUD -->
+    <div id="hud"><div id="power">Power: 100%</div></div>
+    <div id="powerUsage">
+        <div id="bar1" class="usageBar usageBar--normal"></div>
+        <div id="bar2" class="usageBar usageBar--normal"></div>
+        <div id="bar3" class="usageBar usageBar--warning"></div>
+        <div id="bar4" class="usageBar usageBar--critical"></div>
+    </div>
+    <div id="camHUD">
+        <div id="camHealthText">CAM 100%</div>
+        <img id="camClock" src="assets/TEXTURES/clock.png" draggable="false" alt="">
+    </div>
+    <div id="nightDisplay"></div>
+
+    <!-- Office controls -->
+    <div id="controlTab" class="tab">^^ CONTROL PANEL ^^</div>
+    <div id="camTab" class="tab">^^ CAMERAS ^^</div>
+    <div id="camBarTop" class="camBar"></div>
+    <div id="camBarBottom" class="camBar"></div>
+    <div id="lightTab" class="tab">LIGHT</div>
+    <div id="controlPanel">
+        CONTROL PANEL &gt;&gt;&gt;<br><br>
+        <div id="restartBtn" class="button">RESTART CAMERA SYSTEM <span id="errorText"></span></div>
+        <div id="shutVentsBtn" class="button">&gt;&gt;&gt; SHUT VENTS</div>
+        <br><br>
+        You will be rescued in 5 days, survive the 5 days without getting caught.<br><br>
+        If you are caught then thats wraps for you.<br><br>
+        If the rescue team cannot make it to you, you will have to wait 2 additional days.<br><br>
+        Good luck.
+    </div>
+
+    <!-- Start and pause dialogs -->
+    <div id="startPopup">
+        <p>Welcome to FNAE!<br><br>Survive the night and monitor the cameras carefully. Use lights and controls wisely, because power is limited.</p>
+        <button id="startButton" type="button">OK</button>
+    </div>
+    <div id="escapeMenu">
+        <div class="pause-content">
+            <div class="pause-title">PAUSED</div>
+            <button id="quitGameBtn" type="button">QUIT</button>
+        </div>
+    </div>
+
+    <!-- Jumpscare and death layers -->
+    <div id="jumpscareContainer"><img id="jumpscareImage" src="assets/TEXTURES/jumpscare.png" draggable="false" alt=""></div>
+    <div id="deathStatic">
+        <img id="deathStaticImage" src="assets/TEXTURES/static.gif" draggable="false" alt="">
+        <div id="deathContinue">CLICK TO CONTINUE</div>
+    </div>
+    <div id="gameOverText">YOU GOT TOUCHED</div>
+
+    <!-- Between-night dialog -->
+    <div id="decryptWindow">
+        <div id="decryptTitleBar">
+            <div id="decryptTrafficLights">
+                <div class="traffic-light--red"></div>
+                <div class="traffic-light--yellow"></div>
+                <div class="traffic-light--green"></div>
+            </div>
+            <div id="decryptTitle">Elon Musk</div>
+        </div>
+        <div id="decryptContent"><div id="decryptMessage">PLEASE JEFF LET ME COME PLEASE.</div></div>
+        <div id="decryptFooter">
+            <button id="decryptBtn" type="button">DECRYPT</button>
+            <button id="finishBtn" type="button">FINISH</button>
+        </div>
+    </div>
+    <button id="muteBtn" type="button">MUTE CALL</button>
+
+    <!-- Ending layers -->
+    <div id="redGradientOverlay"></div>
+    <div id="endingBlackOverlay"></div>
+    <div id="sleepScreen"><div id="sleepPrompt">CLICK TO GO TO SLEEP</div></div>
+    <div id="wakeScreen"><div>CLICK TO WAKE UP</div></div>
+    <div id="finalScreen">
+        <h1>GAME OVER</h1>
+        <p>You burned in the fire</p>
+        <div class="continue">Click to continue to main menu</div>
+    </div>
+
+    <!-- Developer night skip -->
+    <div id="nightSkipPopup">
+        <div id="nightSkipTitle">SKIP TO NIGHT</div>
+        <input id="skipNightInput" type="number" min="1" max="5" value="5">
+        <div>
+            <button id="skipConfirmBtn" type="button">SKIP</button>
+            <button id="skipCancelBtn" type="button">CANCEL</button>
+        </div>
+    </div>
+
+    <!-- Keep the original static sources so the scene is visible even before JavaScript finishes loading. -->
+    <audio id="fanSound" src="assets/SFX/fan.wav" loop></audio>
+    <audio id="monitorStatic" src="assets/SFX/monitor_static.wav" loop></audio>
+    <audio id="buttonClick" src="assets/SFX/click.wav"></audio>
+    <audio id="powerOutAudio" src="assets/SFX/powerout.wav"></audio>
+    <audio id="beepSound" src="assets/SFX/beep.wav" loop></audio>
+    <audio id="alarmSound" src="assets/SFX/alerm.wav" loop></audio>
+    <audio id="activateSound" src="assets/SFX/activate.wav"></audio>
+    <audio id="damageSound" src="assets/SFX/damage.wav"></audio>
+    <audio id="jumpscareSound" src="assets/SFX/jumpscare.wav"></audio>
+    <audio id="static3Sound" src="assets/SFX/static3.wav" loop></audio>
+    <audio id="cameraPanSound" src="assets/SFX/camerasounds.wav" loop></audio>
+    <audio id="overSound" src="assets/SFX/over.wav"></audio>
+    <audio id="phonecall1Sound" src="assets/SFX/phonecall1.wav"></audio>
+    <audio id="phonecall2Sound" src="assets/SFX/phonecall2.wav"></audio>
+    <audio id="phonecall3Sound" src="assets/SFX/phonecall3.wav"></audio>
+    <audio id="phonecall4Sound" src="assets/SFX/phonecall4.wav"></audio>
+    <audio id="phonecall5Sound" src="assets/SFX/phonecall5.wav"></audio>
+    <audio id="phonecall6Sound" src="assets/SFX/phonecall6.wav"></audio>
+    <audio id="alarendgSound" src="assets/SFX/alarmendg.wav"></audio>
+    <audio id="static4Sound" src="assets/SFX/static4.wav"></audio>
+
+    <!-- Shared data/state, followed by one direct script for every game function. -->
+    <script src="data/game-config.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/dom.js"></script>
+    <script src="js/state.js"></script>
+    <script src="js/runtime.js"></script>
+
+    <script src="js/functions/assets/assign-asset-sources.js"></script>
+    <script src="js/functions/assets/preload-assets.js"></script>
+    <script src="js/functions/audio/play-click.js"></script>
+    <script src="js/functions/audio/ramp-volume.js"></script>
+    <script src="js/functions/audio/start-control-panel-alarm.js"></script>
+    <script src="js/functions/audio/stop-control-panel-alarm.js"></script>
+    <script src="js/functions/audio/stop-all-looping-audio.js"></script>
+
+    <script src="js/functions/camera/close-camera-window.js"></script>
+    <script src="js/functions/camera/open-camera-window.js"></script>
+    <script src="js/functions/camera/restart-cameras.js"></script>
+    <script src="js/functions/camera/shut-vents.js"></script>
+    <script src="js/functions/camera/start-camera-flicker.js"></script>
+    <script src="js/functions/camera/start-camera-health-timer.js"></script>
+    <script src="js/functions/camera/start-camera-pan.js"></script>
+    <script src="js/functions/camera/stop-camera-flicker.js"></script>
+    <script src="js/functions/camera/stop-camera-pan.js"></script>
+    <script src="js/functions/camera/switch-camera.js"></script>
+    <script src="js/functions/camera/trigger-camera-error.js"></script>
+    <script src="js/functions/camera/trigger-movement-glitch.js"></script>
+    <script src="js/functions/camera/update-camera-pan-state.js"></script>
+
+    <script src="js/functions/scene/animate-office-pan.js"></script>
+    <script src="js/functions/scene/refresh-camera-image.js"></script>
+    <script src="js/functions/scene/update-office-image.js"></script>
+    <script src="js/functions/enemy/move-enemy.js"></script>
+    <script src="js/functions/enemy/play-lure.js"></script>
+    <script src="js/functions/enemy/trigger-jumpscare.js"></script>
+    <script src="js/functions/power/activate-power-cheat.js"></script>
+    <script src="js/functions/power/hide-hud-for-power-out.js"></script>
+    <script src="js/functions/power/start-power-system.js"></script>
+    <script src="js/functions/power/update-power-bars.js"></script>
+    <script src="js/functions/night/end-night.js"></script>
+    <script src="js/functions/night/play-night-phone-call.js"></script>
+    <script src="js/functions/night/start-night.js"></script>
+    <script src="js/functions/night/update-night-display.js"></script>
+
+    <script src="js/functions/ending/end-night-six-sequence.js"></script>
+    <script src="js/functions/ending/start-ending-camera-glitch.js"></script>
+    <script src="js/functions/ending/start-night-five-sleep-sequence.js"></script>
+    <script src="js/functions/ending/start-night-six-ending.js"></script>
+    <script src="js/functions/ending/stop-ending-camera-glitch.js"></script>
+
+    <script src="js/functions/controls/setup-camera-buttons.js"></script>
+    <script src="js/functions/controls/setup-camera-tab-toggle.js"></script>
+    <script src="js/functions/controls/setup-control-panel-toggle.js"></script>
+    <script src="js/functions/controls/setup-decrypt-button.js"></script>
+    <script src="js/functions/controls/setup-decrypt-tab-toggle.js"></script>
+    <script src="js/functions/controls/setup-decrypt-window-dragging.js"></script>
+    <script src="js/functions/controls/setup-escape-menu.js"></script>
+    <script src="js/functions/controls/setup-final-screen-button.js"></script>
+    <script src="js/functions/controls/setup-finish-button.js"></script>
+    <script src="js/functions/controls/setup-light-tab-toggle.js"></script>
+    <script src="js/functions/controls/setup-lure-button.js"></script>
+    <script src="js/functions/controls/setup-mute-button.js"></script>
+    <script src="js/functions/controls/setup-night-skip-shortcut.js"></script>
+    <script src="js/functions/controls/setup-office-pan.js"></script>
+    <script src="js/functions/controls/setup-power-cheat-shortcut.js"></script>
+    <script src="js/functions/controls/setup-quit-button.js"></script>
+    <script src="js/functions/controls/setup-restart-controls.js"></script>
+    <script src="js/functions/controls/setup-start-button.js"></script>
+    <script src="js/functions/bootstrap/initialize-game.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
