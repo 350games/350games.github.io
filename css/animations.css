@@ -1,0 +1,35 @@
+/* Camera movement and health animations */
+#cameraImage.camera-pan {
+    animation: cameraPan 18s ease-in-out infinite;
+    transform: scale(1.12);
+}
+
+@keyframes cameraPan {
+    0%, 100% {
+        transform: scale(1.12) translateX(4%);
+    }
+
+    50% {
+        transform: scale(1.12) translateX(-4%);
+    }
+}
+
+@keyframes camTimer {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes clockPulse {
+    0%, 6.67% {
+        opacity: 0.5;
+    }
+
+    6.68%, 100% {
+        opacity: 1;
+    }
+}

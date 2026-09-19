@@ -1,0 +1,284 @@
+/* Global interaction rules */
+* {
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+    -webkit-user-drag: none !important;
+}
+
+img {
+    -webkit-user-drag: none;
+    user-drag: none;
+}
+
+#taskBar button,
+.tab,
+#lureBtn {
+    cursor: pointer;
+}
+
+body {
+    margin: 0;
+    overflow: hidden;
+    background: black;
+    color: #00ff00;
+    font-family: monospace;
+}
+
+/* Office view */
+#office {
+    position: fixed;
+    top: 0;
+    left: -20%;
+    width: 140%;
+    height: 100%;
+    object-fit: cover;
+    transition: left 0.08s linear;
+}
+
+/* Camera monitor */
+#cameraWindow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 2;
+    display: none;
+    width: min(90vw, 1080px);
+    height: min(70vh, 648px);
+    overflow: hidden;
+    border: 3px solid #00ff00;
+    border-radius: 16px;
+    background: black;
+    opacity: 0;
+    transform: translate(-50%, -50%);
+    transition: opacity 0.5s ease-out;
+}
+
+#cameraImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 1;
+    transition: opacity 0.45s linear;
+}
+
+#static {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 3;
+    width: 100%;
+    height: 100%;
+    opacity: 0.12;
+    pointer-events: none;
+    transition: opacity 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+    filter: contrast(1.08) brightness(1.04);
+    will-change: opacity;
+}
+
+#static.camera-transition-active {
+    opacity: 0.88 !important;
+    transition: opacity 0.14s linear !important;
+}
+
+#errOverlay {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 5;
+    display: none;
+    width: 100px;
+    height: 50px;
+}
+
+#taskBar {
+    position: absolute;
+    top: calc(50% + min(35vh, 336px) + 8px);
+    left: 50%;
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: min(90vw, 1080px);
+    height: 60px;
+    padding: 0 10px;
+    border: 3px solid #00ff00;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.8);
+    opacity: 0;
+    transform: translateX(-50%);
+    transition: opacity 0.5s ease;
+}
+
+#taskBar button {
+    width: 80px;
+    height: 40px;
+    margin-right: 10px;
+    border: 2px solid #00ff00;
+    border-radius: 12px;
+    background: rgba(0, 255, 0, 0.15);
+    color: #00ff00;
+    cursor: pointer;
+    font-family: monospace;
+    font-size: 14px;
+    opacity: 1;
+    transition: all 0.2s, opacity 0.5s ease;
+}
+
+#taskBar button:hover {
+    background: rgba(0, 255, 0, 0.35);
+    box-shadow: 0 0 12px #00ff00;
+}
+
+/* HUD */
+#hud {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    z-index: 5;
+    font-size: 20px;
+}
+
+#powerUsage {
+    position: absolute;
+    top: 48px;
+    right: 20px;
+    z-index: 5;
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.usageBar {
+    width: 14px;
+    height: 22px;
+    border: 2px solid #00ff00;
+    border-radius: 3px;
+    transition: height 0.3s ease;
+}
+
+.usageBar--normal {
+    background: #00ff00;
+}
+
+.usageBar--warning {
+    background: #ffff00;
+}
+
+.usageBar--critical {
+    background: #ff0000;
+}
+
+#camHUD {
+    position: absolute;
+    top: 10px;
+    left: 20px;
+    z-index: 5;
+    text-align: left;
+}
+
+#camHealthText {
+    margin-bottom: 4px;
+    color: #00ff00;
+    font-size: 20px;
+}
+
+#camClock {
+    display: block;
+    width: 68px;
+    height: 68px;
+    animation: camTimer 15s linear infinite, clockPulse 15s linear infinite;
+}
+
+/* Controls */
+.tab {
+    position: absolute;
+    z-index: 5;
+    padding: 20px 25px;
+    border: 3px solid #00ff00;
+    border-radius: 12px;
+    background: black;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    transition: opacity 0.4s;
+}
+
+#controlTab {
+    bottom: 10px;
+    left: 10px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+#camTab {
+    top: 50%;
+    right: 10px;
+    padding: 20px 25px;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-50%) rotate(180deg);
+    writing-mode: vertical-rl;
+}
+
+#lightTab {
+    right: 30px;
+    bottom: 30px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.camBar {
+    position: absolute;
+    z-index: 4;
+    height: 26px;
+    background: #00ff00;
+    box-shadow: 0 0 42px #00ff00, 0 0 18px #00ff00, 0 0 8px #00ff00;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+#camBarTop {
+    top: calc(50% - 46px);
+    left: calc(50% + min(45vw, 540px));
+    width: max(0px, calc(50% - min(45vw, 540px) - 60px));
+}
+
+#camBarBottom {
+    top: calc(50% + 46px);
+    left: calc(50% + min(45vw, 540px));
+    width: max(0px, calc(50% - min(45vw, 540px) - 60px));
+}
+
+#controlPanel {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 5;
+    display: none;
+    width: 400px;
+    max-height: 80%;
+    padding: 20px;
+    overflow: auto;
+    border: 3px solid #00ff00;
+    border-radius: 16px;
+    background: black;
+    transform: translate(-50%, -50%);
+}
+
+.button {
+    margin-top: 10px;
+    padding: 6px;
+    border: 1px solid #00ff00;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+#errorText {
+    display: inline-block;
+    margin-left: 5px;
+    color: red;
+    font-weight: bold;
+}
